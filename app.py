@@ -2,12 +2,21 @@ import streamlit as st
 import nltk
 from io import StringIO
 
-# Ensure nltk 'punkt' tokenizer is available
+import os
+import streamlit as st
+import nltk
+from io import StringIO
+
+# Set NLTK download path for Streamlit Cloud
+nltk_data_path = os.path.expanduser("~/.nltk_data")
+nltk.data.path.append(nltk_data_path)
+
+# Ensure punkt is downloaded
 try:
     nltk.data.find('tokenizers/punkt')
+    
 except LookupError:
-    nltk.download('punkt')
-
+    nltk.download('punkt', download_dir=nltk_data_path)
 from sumy.parsers.plaintext import PlaintextParser
 from sumy.nlp.tokenizers import Tokenizer
 from sumy.summarizers.lsa import LsaSummarizer
