@@ -1,19 +1,26 @@
-
 import os
 import streamlit as st
 import nltk
 from io import StringIO
 
-# Setup NLTK data path for Cloud (and add to search path)
-nltk_data_dir = os.path.expanduser("~/.nltk_data")
-os.makedirs(nltk_data_dir, exist_ok=True)
-nltk.data.path.append(nltk_data_dir)
+# Setup NLTK data path
+nltk_data_path = os.path.expanduser("~/.nltk_data")
+os.makedirs(nltk_data_path, exist_ok=True)
+nltk.data.path.append(nltk_data_path)
 
-# Force download of 'punkt' BEFORE it is needed
+# Download 'punkt' if not already
 try:
     nltk.data.find("tokenizers/punkt")
 except LookupError:
-    nltk.download("punkt", download_dir=nltk_data_dir, quiet=True)
+    nltk.download("punkt", download_dir=nltk_data_path, quiet=True)
+
+# ✅ Monkey patch: create dummy 'punkt_tab' path if sumy tries to call it
+try:
+    punkt_path = nltk.data.find("tokenizers/punkt")
+    fake_punkt_tab = os.path.join(os.path.dirname(punkt_path), "punkt_tab")
+    os.makedirs(fake_punkt_tab, exist_ok=True)
+except Exception as e:
+    st.error(f"Monkey patching for punkt_tab failed: {e}")
 
     
 from sumy.parsers.plaintext import PlaintextParser
