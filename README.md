@@ -6,7 +6,7 @@ A simple and interactive web app built with **Streamlit** and **Sumy** that allo
 
 ## 🌐 Live Demo
 
-👉 [Click here to use the app](https://akshay4699-text-summarization-2.streamlit.app)
+👉 [Click here to use the app](https://text-summarization-2-frvc6bycb9bmejkqt8xcpe.streamlit.app/)
 
 ---
 
