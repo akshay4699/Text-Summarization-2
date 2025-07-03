@@ -4,6 +4,8 @@ from sumy.nlp.tokenizers import Tokenizer
 from sumy.summarizers.lsa import LsaSummarizer
 from sumy.summarizers.lex_rank import LexRankSummarizer
 from sumy.summarizers.luhn import LuhnSummarizer
+import nltk
+nltk.download('punkt')
 
 # Function to summarize text
 def summarize_text(text, num_sentences=3, method="lsa"):
