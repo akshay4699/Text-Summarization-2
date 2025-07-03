@@ -1,12 +1,18 @@
 import streamlit as st
 import nltk
-nltk.download('punkt')
+from io import StringIO
+
+# Ensure nltk 'punkt' tokenizer is available
+try:
+    nltk.data.find('tokenizers/punkt')
+except LookupError:
+    nltk.download('punkt')
+
 from sumy.parsers.plaintext import PlaintextParser
 from sumy.nlp.tokenizers import Tokenizer
 from sumy.summarizers.lsa import LsaSummarizer
 from sumy.summarizers.lex_rank import LexRankSummarizer
 from sumy.summarizers.luhn import LuhnSummarizer
-
 
 # Function to summarize text
 def summarize_text(text, num_sentences=3, method="lsa"):
@@ -34,26 +40,41 @@ def get_text_stats(text):
 st.set_page_config(page_title="🧠 Text Summarizer", layout="centered")
 st.title("🧠 Text Summarizer App (Sumy-based)")
 
-text = st.text_area("📄 Enter your text here:", height=300)
+# Input method: text or file
+input_method = st.radio("Choose input method:", ["Type text", "Upload .txt file"])
+
+text = ""
+if input_method == "Type text":
+    text = st.text_area("📄 Enter your text here:", height=300)
+else:
+    uploaded_file = st.file_uploader("📁 Upload a .txt file", type="txt")
+    if uploaded_file is not None:
+        stringio = StringIO(uploaded_file.getvalue().decode("utf-8"))
+        text = stringio.read()
 
 method = st.selectbox("🧪 Choose summarization algorithm:", ["lsa", "lexrank", "luhn"])
 num_sentences = st.slider("✂️ Number of summary sentences:", min_value=1, max_value=10, value=3)
 
 # Suggestion based on text length
-if len(text.split()) < 150 and method != "luhn":
-    st.warning("ℹ️ Tip: For short texts, 'Luhn' may give better summaries.")
-elif len(text.split()) > 500 and method != "lexrank":
-    st.info("💡 Tip: For long documents, 'LexRank' may produce more relevant summaries.")
+if text:
+    word_count = len(text.split())
+    if word_count < 150 and method != "luhn":
+        st.warning("ℹ️ Tip: For short texts, 'Luhn' may give better summaries.")
+    elif word_count > 500 and method != "lexrank":
+        st.info("💡 Tip: For long documents, 'LexRank' might produce more relevant summaries.")
 
+# Summarize
 if st.button("🚀 Summarize"):
     if not text.strip():
-        st.warning("Please enter some text first.")
+        st.warning("Please enter or upload some text first.")
     else:
         summary = summarize_text(text, num_sentences, method)
 
+        # Text stats
         orig_words, orig_chars = get_text_stats(text)
         summ_words, summ_chars = get_text_stats(summary)
 
+        # Display results
         st.subheader("📊 Original Text Stats")
         st.info(f"Words: {orig_words} | Characters: {orig_chars}")
 
@@ -62,3 +83,11 @@ if st.button("🚀 Summarize"):
 
         st.subheader("📊 Summary Stats")
         st.info(f"Words: {summ_words} | Characters: {summ_chars}")
+
+        # Download option
+        st.download_button(
+            label="📥 Download Summary as .txt",
+            data=summary,
+            file_name="summary.txt",
+            mime="text/plain"
+        )
